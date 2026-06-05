@@ -98,9 +98,20 @@ public class DonorService {
     public void updateProfileSettings(int userId, boolean feelingHealthy, boolean recentSurgeryTattoo, int preferredDistance, boolean notificationsEnabled) {
         donorRepository.updateProfile(userId, feelingHealthy, recentSurgeryTattoo, preferredDistance, notificationsEnabled);
         
-        // Re-evaluate availability if health status changes
-        if (!feelingHealthy || recentSurgeryTattoo) {
-            updateAvailability(userId, false);
+        // Re-evaluate availability based on full criteria
+        DonorProfile profile = donorRepository.findByUserId(userId);
+        if (profile != null) {
+            boolean isEligible = feelingHealthy && !recentSurgeryTattoo;
+            
+            // Check donation cooldown (90 days)
+            if (profile.getLastDonationDate() != null) {
+                long daysSinceDonation = ChronoUnit.DAYS.between(profile.getLastDonationDate(), LocalDate.now());
+                if (daysSinceDonation < 90) {
+                    isEligible = false;
+                }
+            }
+            
+            donorRepository.updateAvailability(userId, isEligible);
         }
     }
 }

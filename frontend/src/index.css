@@ -3,9 +3,14 @@
 @theme {
   --color-primary-50: #fff1f2;
   --color-primary-100: #ffe4e6;
+  --color-primary-200: #fecdd3;
+  --color-primary-300: #fda4af;
+  --color-primary-400: #fb7185;
   --color-primary-500: #ef4444;
   --color-primary-600: #dc2626;
   --color-primary-700: #b91c1c;
+  --color-primary-800: #991b1b;
+  --color-primary-900: #7f1d1d;
   
   --color-medical-blue: #0ea5e9;
   --color-medical-dark: #0f172a;

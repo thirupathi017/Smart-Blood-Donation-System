@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Search, MapPin, Droplets, Star, Loader2, MessageCircle, AlertCircle } from 'lucide-react';
-import ChatWindow from '../components/ChatWindow';
+import useSocket from '../store/useSocket';
 
 const SearchDonors = () => {
   const [bloodGroup, setBloodGroup] = useState('A+');
@@ -9,39 +9,64 @@ const SearchDonors = () => {
   const [donors, setDonors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [requestedDonors, setRequestedDonors] = useState(new Set());
-  const [activeChatUser, setActiveChatUser] = useState(null);
+  const { setActiveChatUser } = useSocket();
+
+  const cityCoordinates = {
+    'Chennai': { lat: 13.0827, lng: 80.2707 },
+    'Coimbatore': { lat: 11.0168, lng: 76.9558 },
+    'Madurai': { lat: 9.9252, lng: 78.1198 },
+    'Tiruchirappalli': { lat: 10.7905, lng: 78.7047 },
+    'Salem': { lat: 11.6643, lng: 78.1460 },
+    'Tirunelveli': { lat: 8.7139, lng: 77.7567 },
+    'Erode': { lat: 11.3410, lng: 77.7172 },
+    'Vellore': { lat: 12.9165, lng: 79.1325 },
+    'Thoothukudi': { lat: 8.8049, lng: 78.1348 },
+    'Nagercoil': { lat: 8.1833, lng: 77.4119 },
+    'Bengaluru': { lat: 12.9716, lng: 77.5946 },
+    'Hyderabad': { lat: 17.3850, lng: 78.4867 },
+    'Mumbai': { lat: 19.0760, lng: 72.8777 },
+    'Delhi': { lat: 28.6139, lng: 77.2090 },
+    'Kolkata': { lat: 22.5726, lng: 88.3639 }
+  };
+
+  const performSearch = async (lat, lng) => {
+    try {
+      const response = await axios.get('/api/donors/search', {
+        params: { bloodGroup, lat, lng }
+      });
+      // Sort results by distance (nearest first), then by score as tiebreaker
+      const sorted = response.data.sort((a, b) => {
+        const distDiff = a.distance - b.distance;
+        if (Math.abs(distDiff) > 0.01) return distDiff; // nearest first
+        return b.score - a.score; // higher score first for same distance
+      });
+      setDonors(sorted);
+    } catch (err) {
+      console.error('Search failed', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = async (e) => {
     if (e) e.preventDefault();
     setLoading(true);
     
-    // Get geolocation
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const { latitude, longitude } = position.coords;
-      try {
-        const response = await axios.get('/api/donors/search', {
-          params: { bloodGroup, lat: latitude, lng: longitude }
-        });
-        setDonors(response.data);
-      } catch (err) {
-        console.error('Search failed', err);
-      } finally {
-        setLoading(false);
+    // If a city is selected, use its coordinates
+    if (city && cityCoordinates[city]) {
+      const { lat, lng } = cityCoordinates[city];
+      performSearch(lat, lng);
+      return;
+    }
+
+    // Otherwise use browser geolocation, with Coimbatore fallback
+    navigator.geolocation.getCurrentPosition(
+      (position) => performSearch(position.coords.latitude, position.coords.longitude),
+      () => {
+        console.warn("Geolocation failed, using default coordinates (Coimbatore)");
+        performSearch(11.0168, 76.9558);
       }
-    }, async (error) => {
-      console.warn("Geolocation failed, using default coordinates", error);
-      // Fallback to Coimbatore
-      try {
-        const response = await axios.get('/api/donors/search', {
-          params: { bloodGroup, lat: 11.0168, lng: 76.9558 }
-        });
-        setDonors(response.data);
-      } catch (err) {
-        console.error('Search failed', err);
-      } finally {
-        setLoading(false);
-      }
-    });
+    );
   };
 
   const handleRequestContact = async (donor) => {
@@ -107,19 +132,9 @@ const SearchDonors = () => {
                 onChange={(e) => setCity(e.target.value)}
               >
                 <option value="">All Cities (Auto-detect)</option>
-                <option value="Chennai">Chennai</option>
-                <option value="Coimbatore">Coimbatore</option>
-                <option value="Madurai">Madurai</option>
-                <option value="Tiruchirappalli">Tiruchirappalli</option>
-                <option value="Salem">Salem</option>
-                <option value="Erode">Erode</option>
-                <option value="Tirunelveli">Tirunelveli</option>
-                <option value="Vellore">Vellore</option>
-                <option value="Bengaluru">Bengaluru</option>
-                <option value="Hyderabad">Hyderabad</option>
-                <option value="Mumbai">Mumbai</option>
-                <option value="Delhi">Delhi</option>
-                <option value="Kolkata">Kolkata</option>
+                {Object.keys(cityCoordinates).sort().map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
               </select>
               <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">▾</div>
             </div>
@@ -239,13 +254,6 @@ const SearchDonors = () => {
           </div>
         )}
       </div>
-
-      {activeChatUser && (
-        <ChatWindow 
-          targetUser={activeChatUser} 
-          onClose={() => setActiveChatUser(null)} 
-        />
-      )}
     </div>
   );
 };

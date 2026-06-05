@@ -34,15 +34,6 @@ CREATE TABLE IF NOT EXISTS donor_profiles (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-ALTER TABLE donor_profiles ADD COLUMN IF NOT EXISTS weight INT DEFAULT 0;
-ALTER TABLE donor_profiles ADD COLUMN IF NOT EXISTS feeling_healthy BOOLEAN DEFAULT TRUE;
-ALTER TABLE donor_profiles ADD COLUMN IF NOT EXISTS recent_surgery_tattoo BOOLEAN DEFAULT FALSE;
-ALTER TABLE donor_profiles ADD COLUMN IF NOT EXISTS preferred_distance INT DEFAULT 50;
-ALTER TABLE donor_profiles ADD COLUMN IF NOT EXISTS notifications_enabled BOOLEAN DEFAULT TRUE;
-ALTER TABLE donor_profiles ADD COLUMN IF NOT EXISTS total_donations INT DEFAULT 0;
-ALTER TABLE donor_profiles ADD COLUMN IF NOT EXISTS lives_impacted INT DEFAULT 0;
-ALTER TABLE donor_profiles ADD COLUMN IF NOT EXISTS rating DOUBLE DEFAULT 5.0;
-
 -- 3. Blood Requests Table
 CREATE TABLE IF NOT EXISTS blood_requests (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -52,9 +43,11 @@ CREATE TABLE IF NOT EXISTS blood_requests (
     latitude DOUBLE NOT NULL,
     longitude DOUBLE NOT NULL,
     message TEXT,
-    status ENUM('OPEN', 'CLOSED', 'CANCELLED') DEFAULT 'OPEN',
+    donor_id INT,
+    status ENUM('OPEN', 'ACCEPTED', 'COMPLETED', 'CLOSED', 'CANCELLED') DEFAULT 'OPEN',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (donor_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- 4. Donations History Table
@@ -65,4 +58,30 @@ CREATE TABLE IF NOT EXISTS donations (
     donation_date DATE NOT NULL,
     FOREIGN KEY (donor_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- 5. Chat Messages Table
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    from_user_id INT NOT NULL,
+    to_user_id INT NOT NULL,
+    text TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (from_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (to_user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 6. Notifications Table
+CREATE TABLE IF NOT EXISTS notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    message TEXT,
+    type VARCHAR(50) NOT NULL,
+    from_user_id INT,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (from_user_id) REFERENCES users(id) ON DELETE SET NULL
 );

@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { User, Mail, Lock, MapPin, Phone, Loader2, Droplets, Calendar, Eye, EyeOff } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 
 const Register = () => {
+  const [searchParams] = useSearchParams();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -19,12 +21,47 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isFirstTimeDonor, setIsFirstTimeDonor] = useState(false);
 
-  
+  // Re-sync role whenever the ?role= URL param changes
+  useEffect(() => {
+    const roleParam = searchParams.get('role');
+    if (roleParam === 'DONOR' || roleParam === 'RECEIVER') {
+      setFormData(prev => ({ ...prev, role: roleParam }));
+    }
+  }, [searchParams]);
+
   const { register, loading, error } = useAuthStore();
   const navigate = useNavigate();
 
+  const cityCoordinates = {
+    'Chennai': { lat: 13.0827, lng: 80.2707 },
+    'Coimbatore': { lat: 11.0168, lng: 76.9558 },
+    'Madurai': { lat: 9.9252, lng: 78.1198 },
+    'Trichy': { lat: 10.7905, lng: 78.7047 },
+    'Salem': { lat: 11.6643, lng: 78.1460 },
+    'Tirunelveli': { lat: 8.7139, lng: 77.7567 },
+    'Erode': { lat: 11.3410, lng: 77.7172 },
+    'Vellore': { lat: 12.9165, lng: 79.1325 },
+    'Thoothukudi': { lat: 8.8049, lng: 78.1348 },
+    'Nagercoil': { lat: 8.1833, lng: 77.4119 },
+    'Bangalore': { lat: 12.9716, lng: 77.5946 },
+    'Hyderabad': { lat: 17.3850, lng: 78.4867 },
+    'Mumbai': { lat: 19.0760, lng: 72.8777 },
+    'Delhi': { lat: 28.6139, lng: 77.2090 },
+    'Kolkata': { lat: 22.5726, lng: 88.3639 }
+  };
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'city' && cityCoordinates[value]) {
+      setFormData({ 
+        ...formData, 
+        city: value,
+        latitude: cityCoordinates[value].lat,
+        longitude: cityCoordinates[value].lng
+      });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {

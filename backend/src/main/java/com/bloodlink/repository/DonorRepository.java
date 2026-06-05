@@ -55,12 +55,12 @@ public class DonorRepository {
     }
 
     public List<DonorProfile> findByBloodGroup(String bloodGroup) {
-        String sql = "SELECT * FROM donor_profiles WHERE blood_group = ? AND availability = TRUE";
+        String sql = "SELECT * FROM donor_profiles WHERE blood_group = ? AND availability = TRUE AND (last_donation_date IS NULL OR DATEDIFF(CURRENT_DATE, last_donation_date) >= 90)";
         return jdbcTemplate.query(sql, donorRowMapper, bloodGroup);
     }
 
     public List<DonorProfile> findAllAvailable() {
-        String sql = "SELECT * FROM donor_profiles WHERE availability = TRUE";
+        String sql = "SELECT * FROM donor_profiles WHERE availability = TRUE AND (last_donation_date IS NULL OR DATEDIFF(CURRENT_DATE, last_donation_date) >= 90)";
         return jdbcTemplate.query(sql, donorRowMapper);
     }
 
@@ -78,5 +78,10 @@ public class DonorRepository {
     public int updateProfile(int userId, boolean feelingHealthy, boolean recentSurgeryTattoo, int preferredDistance, boolean notificationsEnabled) {
         String sql = "UPDATE donor_profiles SET feeling_healthy = ?, recent_surgery_tattoo = ?, preferred_distance = ?, notifications_enabled = ? WHERE user_id = ?";
         return jdbcTemplate.update(sql, feelingHealthy, recentSurgeryTattoo, preferredDistance, notificationsEnabled, userId);
+    }
+
+    public int recordDonation(int userId) {
+        String sql = "UPDATE donor_profiles SET total_donations = total_donations + 1, lives_impacted = lives_impacted + 3, last_donation_date = CURRENT_DATE, availability = FALSE WHERE user_id = ?";
+        return jdbcTemplate.update(sql, userId);
     }
 }

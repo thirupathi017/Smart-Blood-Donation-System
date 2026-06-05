@@ -11,6 +11,7 @@ public class BloodRequest {
     private Double longitude;
     private String message;
     private Integer donorId;
+    private String donorName; // transient, from JOIN
     private String status; // OPEN, CLOSED, CANCELLED
     private LocalDateTime createdAt;
 
@@ -46,4 +47,7 @@ public class BloodRequest {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public String getDonorName() { return donorName; }
+    public void setDonorName(String donorName) { this.donorName = donorName; }
 }

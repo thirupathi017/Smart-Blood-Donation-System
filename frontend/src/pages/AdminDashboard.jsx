@@ -61,7 +61,7 @@ const AdminDashboard = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-          <div className="p-3 bg-blue-50 rounded-xl text-blue-600"><Users /></div>
+          <div className="p-3 bg-primary-50 rounded-xl text-primary-600"><Users /></div>
           <div>
             <p className="text-gray-500 text-sm">Total Users</p>
             <p className="text-2xl font-bold">{stats.total_users}</p>
@@ -128,7 +128,7 @@ const AdminDashboard = () => {
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-md text-xs font-bold ${u.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' :
                         u.role === 'DONOR' ? 'bg-red-100 text-red-700' :
-                          'bg-blue-100 text-blue-700'
+                          'bg-primary-100 text-primary-700'
                       }`}>
                       {u.role}
                     </span>
@@ -146,7 +146,7 @@ const AdminDashboard = () => {
                   </td>
                   <td className="p-4">
                     {u.verified ? (
-                      <span className="text-blue-600 flex items-center gap-1 font-medium">
+                      <span className="text-primary-600 flex items-center gap-1 font-medium">
                         <ShieldCheck size={14} /> Verified
                       </span>
                     ) : (
@@ -159,7 +159,7 @@ const AdminDashboard = () => {
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => toggleVerification(u.id, u.verified)}
-                        className={`p-2 rounded-lg transition-colors ${u.verified ? 'text-gray-400 hover:bg-gray-100' : 'text-blue-600 hover:bg-blue-50'}`}
+                        className={`p-2 rounded-lg transition-colors ${u.verified ? 'text-gray-400 hover:bg-gray-100' : 'text-primary-600 hover:bg-primary-50'}`}
                         title={u.verified ? "Revoke Verification" : "Verify User"}
                       >
                         <ShieldCheck size={18} />
