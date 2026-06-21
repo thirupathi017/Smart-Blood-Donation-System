@@ -1,6 +1,7 @@
 com\bloodlink\controller\AdminController.class
 com\bloodlink\config\WebSocketConfig.class
 com\bloodlink\dto\AuthResponse.class
+com\bloodlink\dto\MLPredictionRequest.class
 com\bloodlink\config\WebSocketConfig$1.class
 com\bloodlink\controller\ChatController.class
 com\bloodlink\dto\RegisterRequest.class
@@ -16,12 +17,14 @@ com\bloodlink\repository\ChatMessageRepository.class
 com\bloodlink\dto\LoginRequest.class
 com\bloodlink\security\JwtUtils.class
 com\bloodlink\service\AuthService.class
+com\bloodlink\service\MLPredictionService.class
 com\bloodlink\repository\NotificationRepository.class
 com\bloodlink\repository\UserRepository.class
 com\bloodlink\repository\DonorRepository.class
 com\bloodlinking\BloodlinkApplication.class
 com\bloodlink\config\SecurityConfig.class
 com\bloodlink\dto\DonorDTO.class
+com\bloodlink\dto\MLPredictionResponse.class
 com\bloodlink\controller\HealthController.class
 com\bloodlink\model\User.class
 com\bloodlink\BloodLinkApplication.class

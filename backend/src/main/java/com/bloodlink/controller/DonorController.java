@@ -34,6 +34,15 @@ public class DonorController {
         return ResponseEntity.ok(profile);
     }
 
+    @GetMapping("/{userId}/ml-insights")
+    public ResponseEntity<?> getMLInsights(@PathVariable int userId) {
+        var prediction = donorService.getMLPrediction(userId);
+        if (prediction == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(prediction);
+    }
+
     @PutMapping("/availability/{userId}")
     public ResponseEntity<?> toggleAvailability(
             @PathVariable int userId,

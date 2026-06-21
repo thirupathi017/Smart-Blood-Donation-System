@@ -9,6 +9,7 @@ const SearchDonors = () => {
   const [donors, setDonors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [requestedDonors, setRequestedDonors] = useState(new Set());
+  const [mlInsights, setMlInsights] = useState({});
   const { setActiveChatUser } = useSocket();
 
   const cityCoordinates = {
@@ -41,6 +42,18 @@ const SearchDonors = () => {
         return b.score - a.score; // higher score first for same distance
       });
       setDonors(sorted);
+      
+      // Fetch ML Insights
+      const insights = {};
+      await Promise.all(sorted.map(async (donor) => {
+        try {
+          const res = await axios.get(`/api/donors/${donor.user.id}/ml-insights`);
+          insights[donor.user.id] = res.data;
+        } catch (e) {
+          console.error('Failed to fetch ML insights for', donor.user.id);
+        }
+      }));
+      setMlInsights(insights);
     } catch (err) {
       console.error('Search failed', err);
     } finally {
@@ -223,6 +236,31 @@ const SearchDonors = () => {
                 </p>
               </div>
             </div>
+
+            {/* AI Insights Section */}
+            {mlInsights[donor.user.id] && (
+              <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 shadow-inner relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-16 h-16 bg-white/40 rounded-full blur-xl pointer-events-none"></div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md shadow-sm">AI Powered</div>
+                  <h4 className="text-xs font-bold text-indigo-900">Predictive Analysis</h4>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-indigo-600/70 block">Availability</span>
+                    <span className={`font-bold ${mlInsights[donor.user.id].is_available ? 'text-green-600' : 'text-amber-500'}`}>
+                      {mlInsights[donor.user.id].availability_probability * 100}% Likelihood
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-indigo-600/70 block">Next Expected</span>
+                    <span className="font-bold text-indigo-800">
+                      {mlInsights[donor.user.id].estimated_days_until_next_donation} days
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-2">
               <button 

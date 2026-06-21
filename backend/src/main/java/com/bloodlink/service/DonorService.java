@@ -18,10 +18,12 @@ import java.util.stream.Collectors;
 public class DonorService {
     private final DonorRepository donorRepository;
     private final UserRepository userRepository;
+    private final MLPredictionService mlPredictionService;
 
-    public DonorService(DonorRepository donorRepository, UserRepository userRepository) {
+    public DonorService(DonorRepository donorRepository, UserRepository userRepository, MLPredictionService mlPredictionService) {
         this.donorRepository = donorRepository;
         this.userRepository = userRepository;
+        this.mlPredictionService = mlPredictionService;
     }
 
     public List<DonorDTO> searchDonors(String bloodGroup, double receiverLat, double receiverLng) {
@@ -89,6 +91,15 @@ public class DonorService {
 
     public DonorProfile getProfileByUserId(int userId) {
         return donorRepository.findByUserId(userId);
+    }
+
+    public com.bloodlink.dto.MLPredictionResponse getMLPrediction(int userId) {
+        DonorProfile profile = donorRepository.findByUserId(userId);
+        User user = userRepository.findById(userId).orElse(null);
+        if (profile == null || user == null) {
+            return null;
+        }
+        return mlPredictionService.getPredictionForDonor(user, profile);
     }
 
     public void updateAvailability(int userId, boolean available) {
