@@ -24,7 +24,7 @@ const Register = () => {
   // Re-sync role whenever the ?role= URL param changes
   useEffect(() => {
     const roleParam = searchParams.get('role');
-    if (roleParam === 'DONOR' || roleParam === 'RECEIVER') {
+    if (roleParam === 'DONOR' || roleParam === 'RECEIVER' || roleParam === 'ADMIN') {
       setFormData(prev => ({ ...prev, role: roleParam }));
     }
   }, [searchParams]);
@@ -121,7 +121,7 @@ const Register = () => {
               <div className="space-y-3">
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Account Type</label>
                 <div className="flex gap-4">
-                  {['DONOR', 'RECEIVER'].map(role => (
+                  {['DONOR', 'RECEIVER', 'ADMIN'].map(role => (
                     <button
                       key={role}
                       type="button"
